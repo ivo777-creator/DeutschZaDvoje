@@ -6,7 +6,7 @@ import {
   supabase, vorlesen, punkteDazu, aktivitaetDazu, akzentSetzen
 } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
-import { staza, trenutnoNiveau, vrstaZadatka, usporedi } from "../../lib/nivoi";
+import { staza, trenutnoNiveau, vrstaZadatka, usporedi, PRAG, PAUZA_SATI } from "../../lib/nivoi";
 
 function Ucenje() {
   const router = useRouter();
@@ -14,6 +14,7 @@ function Ucenje() {
   const tema = trazilica.get("tema");
   const razina = trazilica.get("razina");
   const sekcija = trazilica.get("sekcija");
+  const popravak = trazilica.get("popravak");
 
   const pocetak = useRef(Date.now());
   const spremljeno = useRef(false);
@@ -50,7 +51,12 @@ function Ucenje() {
       setStanje(mapa);
 
       let izbor;
-      if (razina) {
+      if (popravak) {
+        const st = staza(sve || [], teme || [], nap || [], trenutnoNiveau(isp), isp || []);
+        const sek = st.sekcije.find((x) => x.kljuc === popravak);
+        // Nur die, die noch nicht sauber durch sind
+        izbor = (sek?.popravak || []).filter((k) => mapa[k.id]?.zadnji_tocan === false);
+      } else if (razina) {
         const st = staza(sve || [], teme || [], nap || [], trenutnoNiveau(isp), isp || []);
         const sek = st.sekcije.find((x) => x.kljuc === sekcija) || st.sekcije[0];
         izbor = sek?.razine[Number(razina) - 1]?.karte || [];
@@ -69,18 +75,35 @@ function Ucenje() {
       }
       setKartice(izbor);
     })();
-  }, [tema, razina, sekcija, router]);
+  }, [tema, razina, sekcija, popravak, router]);
 
   async function zapisi(k, znam) {
     const post = stanje[k.id];
-    const razmak = znam ? Math.min((post?.abstand_tage || 1) * 2, 60) : 1;
-    await supabase.from("fortschritt").upsert({
+    const noviRichtig = (post?.richtig || 0) + (znam ? 1 : 0);
+
+    /* Erster Treffer: in vier Stunden nochmal. So kann sie ein Level
+       am selben Tag abschliessen, aber nicht in einem Rutsch durchklicken. */
+    let kada, razmak = post?.abstand_tage || 1;
+    if (!znam) {
+      razmak = 1;
+      kada = new Date(Date.now() + 864e5);
+    } else if (noviRichtig < PRAG) {
+      kada = new Date(Date.now() + PAUZA_SATI * 3600e3);
+    } else {
+      razmak = Math.min(razmak * 2, 60);
+      kada = new Date(Date.now() + razmak * 864e5);
+    }
+
+    const red = {
       user_id: uid, karte_id: k.id,
-      richtig: (post?.richtig || 0) + (znam ? 1 : 0),
-      falsch:  (post?.falsch  || 0) + (znam ? 0 : 1),
+      richtig: noviRichtig,
+      falsch:  (post?.falsch || 0) + (znam ? 0 : 1),
       abstand_tage: razmak,
-      naechste_frage: new Date(Date.now() + razmak * 864e5).toISOString()
-    }, { onConflict: "user_id,karte_id" });
+      naechste_frage: kada.toISOString(),
+      zadnji_tocan: znam
+    };
+    await supabase.from("fortschritt").upsert(red, { onConflict: "user_id,karte_id" });
+    setStanje((s) => ({ ...s, [k.id]: red }));
     if (znam) setTocno((n) => n + 1);
   }
 
@@ -109,8 +132,12 @@ function Ucenje() {
   if (kartice.length === 0) {
     return (
       <div className="ekran items-center justify-center px-6 text-center">
-        <p className="text-3xl font-semibold tracking-tight">Za danas si gotova</p>
-        <p className="mt-2 text-tiho">Sve kartice su ponovljene.</p>
+        <p className="text-3xl font-semibold tracking-tight">
+          {popravak ? "Nema više grešaka" : "Za danas si gotova"}
+        </p>
+        <p className="mt-2 text-tiho">
+          {popravak ? "Sve problematične kartice su riješene." : "Sve kartice su ponovljene."}
+        </p>
         <button onClick={() => router.push("/start")} className="knopf-voll mt-8">Natrag</button>
         <Podnozje />
       </div>
@@ -127,6 +154,17 @@ function Ucenje() {
       <div className="ekran items-center justify-center px-6 text-center">
         <p className="text-5xl font-semibold tracking-tight">{tocno} / {kartice.length}</p>
         <p className="mt-3 text-tiho">+{tocno * 5} bodova</p>
+        {!popravak && (() => {
+          const jos = kartice.filter((x) => (stanje[x.id]?.richtig || 0) < PRAG).length;
+          return jos > 0 ? (
+            <p className="mt-4 max-w-xs text-sm text-tiho">
+              Još {jos} {jos === 1 ? "kartica treba" : "kartica trebaju"} drugi krug.
+              Svaka mora sjesti dvaput. Za oko {PAUZA_SATI} sata možeš opet.
+            </p>
+          ) : (
+            <p className="mt-4 text-sm font-medium text-akzent">Cijela razina sjedi!</p>
+          );
+        })()}
         <button onClick={() => router.push("/start")} className="knopf-voll mt-8">
           Natrag na početnu
         </button>
@@ -146,7 +184,8 @@ function Ucenje() {
         <div className="flex items-center justify-between">
           <button onClick={() => router.push("/start")} className="text-sm text-tiho">← Natrag</button>
           <span className="text-xs text-tiho">
-            {vrsta === "tipkanje" ? "Napiši sama"
+            {popravak ? "Razina X · greške"
+              : vrsta === "tipkanje" ? "Napiši sama"
               : vrsta === "clan" ? "Koji član?" : "Prisjeti se"}
           </span>
         </div>

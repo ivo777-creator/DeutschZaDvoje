@@ -6,6 +6,7 @@ import {
   supabase, akzentSetzen, themaSetzen, themaLesen, prognoza, minute
 } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
+import { Vodic } from "../../lib/vodic";
 import { staza, trenutnoNiveau } from "../../lib/nivoi";
 
 export default function Start() {
@@ -24,6 +25,7 @@ export default function Start() {
   const [niveau, setNiveau] = useState("A1");
   const [put, setPut] = useState(null);
   const [otvoren, setOtvoren] = useState(null);
+  const [vodic, setVodic] = useState(false);
 
   useEffect(() => { setTema(themaLesen()); }, []);
 
@@ -56,6 +58,7 @@ export default function Start() {
       const drugiProfil = (profili.data || []).find((p) => p.user_id !== uid) || null;
 
       setJa(mojProfil);
+      if (!mojProfil.vodic_gotov) setVodic(true);
       setDrugi(drugiProfil);
       akzentSetzen(mojProfil.akzent);
 
@@ -121,6 +124,12 @@ export default function Start() {
     };
   }, [provjeriSat]);
 
+  async function zatvoriVodic() {
+    setVodic(false);
+    if (ja) await supabase.from("profile")
+      .update({ vodic_gotov: true }).eq("user_id", ja.user_id);
+  }
+
   function noviTema() {
     const red = { auto: "light", light: "dark", dark: "auto" };
     const n = red[tema];
@@ -146,6 +155,7 @@ export default function Start() {
 
   return (
     <div className="stranica">
+      {vodic && <Vodic onKraj={zatvoriVodic} />}
       {/* Leiste, nur am grossen Bildschirm */}
       <div className="hidden border-b border-rub bg-ploha md:block">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-8 py-4">
@@ -185,6 +195,12 @@ export default function Start() {
             </p>
           </div>
 
+          <button onClick={() => setVodic(true)}
+            title="Kako ovo radi"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full
+                       border border-rub text-sm text-tiho">
+            ?
+          </button>
           <button onClick={noviTema}
             className="rounded-xl border border-rub px-3 py-2 text-xs text-tiho md:hidden">
             {oznakaTeme}
@@ -243,19 +259,41 @@ export default function Start() {
                           {sek.razine.map((r, idx) => {
                             const prije = sek.razine.slice(0, idx).every((x) => x.gotovo);
                             const sada = !r.gotovo && prije;
+                            const dio = Math.round((r.gotovih / r.ukupno) * 100);
                             return (
                               <div key={r.broj} className="flex items-center">
                                 {idx > 0 && <span className={`crta ${r.gotovo ? "crta-ok" : ""}`} />}
                                 <button
                                   onClick={() => router.push(
                                     `/lernen?sekcija=${sek.kljuc}&razina=${r.broj}`)}
-                                  title={`${r.gotovih} / ${r.ukupno}`}
+                                  title={`${r.gotovih} / ${r.ukupno} sjede`}
+                                  style={!r.gotovo && r.gotovih > 0 ? {
+                                    background: `conic-gradient(rgb(var(--akzent)) ${dio}%, rgb(var(--ploha)) 0)`
+                                  } : undefined}
                                   className={`cvor ${r.gotovo ? "cvor-ok" : sada ? "cvor-sada" : ""}`}>
                                   {r.broj}
                                 </button>
                               </div>
                             );
                           })}
+
+                          {/* Level X — die Karten, die Mühe gemacht haben */}
+                          {sek.popravak.length > 0 && (
+                            <>
+                              <span className={`crta ${sek.popravakGotov ? "crta-ok" : ""}`} />
+                              <button
+                                onClick={() => sek.popravakOtvoren &&
+                                  router.push(`/lernen?popravak=${sek.kljuc}`)}
+                                disabled={!sek.popravakOtvoren}
+                                title="Kartice koje su ti zadavale muke"
+                                className={`cvor ${
+                                  sek.popravakGotov ? "cvor-ok"
+                                  : sek.popravakOtvoren ? "cvor-sada animate-pulse" : "opacity-50"}`}>
+                                X
+                              </button>
+                            </>
+                          )}
+
                           <span className={`crta ${sek.ispitPolozen ? "crta-ok" : ""}`} />
                           <button
                             onClick={() => sek.ispitOtvoren &&
@@ -267,7 +305,13 @@ export default function Start() {
                             Ispit
                           </button>
                         </div>
+
                         <p className="mt-2 text-xs text-tiho">{sek.opis}</p>
+                        <p className="mt-1 text-xs text-tiho">
+                          Kartica se boji tek kad sjedne dvaput, s pauzom između.
+                          {sek.popravak.length > 0 &&
+                            ` Razina X skuplja ono što ti je zadavalo muke (${sek.popravak.length}).`}
+                        </p>
                       </>
                     )}
                   </div>
