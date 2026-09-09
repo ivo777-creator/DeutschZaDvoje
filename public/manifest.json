@@ -1,0 +1,9 @@
+{
+  "name": "Deutsch za dvoje",
+  "short_name": "Deutsch",
+  "start_url": "/start",
+  "display": "standalone",
+  "background_color": "#E7EEEF",
+  "theme_color": "#17798F",
+  "icons": []
+}
