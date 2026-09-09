@@ -183,7 +183,7 @@ export default function Sesija() {
   if (!k) return null;
 
   return (
-    <div className="ekran px-5 md:px-8">
+    <div className="ekran w-full overflow-x-clip px-5 md:px-8">
       <div className="mx-auto w-full max-w-md md:max-w-2xl">
         <div className="flex items-center justify-between pt-4">
           <button onClick={() => router.push("/start")} className="text-sm text-tiho">← Natrag</button>

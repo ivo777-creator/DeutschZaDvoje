@@ -3,6 +3,7 @@
   "short_name": "Hallo-Bok",
   "start_url": "/start",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#111111",
   "theme_color": "#111111",
   "icons": [

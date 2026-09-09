@@ -259,7 +259,7 @@ function Ispit() {
   const bezClana = p.karta.de.replace(/^(der|die|das)\s+/i, "");
 
   return (
-    <div className="ekran px-5 md:px-8">
+    <div className="ekran w-full overflow-x-clip px-5 md:px-8">
       <div className="mx-auto w-full max-w-md pt-4 md:max-w-2xl">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium">
