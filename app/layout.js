@@ -13,12 +13,12 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "Deutsch za dvoje",
-  description: "Uči sama, a i skupa s Ivom",
+  title: "Hallo-Bok",
+  description: "Uči njemački — sama i skupa s Ivom",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Deutsch za dvoje"
+    title: "Hallo-Bok"
   },
   icons: {
     icon: [

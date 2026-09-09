@@ -6,6 +6,7 @@ import {
   supabase, akzentSetzen, punkteDazu, aktivitaetDazu, vorlesen, TEZINA
 } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
+import { spremiPdf, spremiSliku, PredlozakPotvrde } from "../../lib/potvrda";
 import {
   staza, trenutnoNiveau, karteNivoa, vrstaPitanja, usporedi,
   SEKCIJE, ISPIT_SEKCIJA, ISPIT_VELIKI, ISPIT_PRAG
@@ -30,6 +31,8 @@ function Ispit() {
   const [upis, setUpis] = useState("");
   const [tocno, setTocno] = useState(0);
   const [gotovo, setGotovo] = useState(false);
+  const [radiSpremanje, setRadiSpremanje] = useState("");
+  const potvrda = useRef(null);
 
   const imeSekcije = SEKCIJE.find((s) => s.kljuc === sekcija)?.ime || "";
 
@@ -199,7 +202,7 @@ function Ispit() {
               {tocno} od {pitanja.length} točno · {postotak}%
             </p>
             <p className="mt-4 border-t border-rub pt-3 text-xs text-tiho">
-              {new Date().toLocaleDateString("hr-HR")} · Deutsch za dvoje
+              {new Date().toLocaleDateString("hr-HR")} · Hallo-Bok
             </p>
           </div>
         )}
@@ -208,7 +211,42 @@ function Ispit() {
           <p className="mt-4 text-sm text-tiho">{tocno} od {pitanja.length} · {postotak}%</p>
         )}
 
-        <button onClick={() => router.push("/start")} className="knopf-voll mt-8">
+        {veliki && (
+          <>
+            <PredlozakPotvrde
+              innerRef={potvrda}
+              ime={ja?.name}
+              niveau={niveau}
+              tocno={tocno}
+              ukupno={pitanja.length}
+              datum={new Date().toLocaleDateString("hr-HR")}
+            />
+            <div className="mt-6 flex w-full max-w-sm gap-2">
+              <button
+                onClick={async () => {
+                  setRadiSpremanje("pdf");
+                  try { await spremiPdf(potvrda.current, ja?.name, niveau); } catch (e) {}
+                  setRadiSpremanje("");
+                }}
+                disabled={!!radiSpremanje}
+                className="knopf-leer flex-1 disabled:opacity-50">
+                {radiSpremanje === "pdf" ? "Trenutak..." : "Spremi PDF"}
+              </button>
+              <button
+                onClick={async () => {
+                  setRadiSpremanje("slika");
+                  try { await spremiSliku(potvrda.current, ja?.name, niveau); } catch (e) {}
+                  setRadiSpremanje("");
+                }}
+                disabled={!!radiSpremanje}
+                className="knopf-leer flex-1 disabled:opacity-50">
+                {radiSpremanje === "slika" ? "Trenutak..." : "Podijeli sliku"}
+              </button>
+            </div>
+          </>
+        )}
+
+        <button onClick={() => router.push("/start")} className="knopf-voll mt-6">
           {veliki ? "Dalje na sljedeći nivo" : "Natrag na put"}
         </button>
         <Podnozje />

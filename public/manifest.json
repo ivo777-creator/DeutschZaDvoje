@@ -1,6 +1,6 @@
 {
-  "name": "Deutsch za dvoje",
-  "short_name": "Deutsch",
+  "name": "Hallo-Bok",
+  "short_name": "Hallo-Bok",
   "start_url": "/start",
   "display": "standalone",
   "background_color": "#111111",

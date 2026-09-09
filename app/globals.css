@@ -82,6 +82,24 @@ body {
   100% { transform: scale(1);   opacity: 1; }
 }
 
+/* Die Zeitleiste A1 bis C2 — seitwärts wischbar, rastet ein */
+.traka {
+  display: flex; gap: 0.75rem;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+.kartica-nivoa {
+  flex: none; scroll-snap-align: start;
+  width: 10.5rem; min-height: 8.5rem;
+  border: 2px solid; border-radius: 1rem;
+  padding: 1rem;
+  background: rgb(var(--ploha));
+}
+@media (min-width: 768px) {
+  .kartica-nivoa { width: 12rem; }
+}
+
 /* Der Lernpfad als eine Linie */
 .putanja {
   display: flex; align-items: center; gap: 0;

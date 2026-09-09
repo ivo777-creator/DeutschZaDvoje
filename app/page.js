@@ -38,7 +38,7 @@ export default function Prijava() {
   return (
     <main className="ekran mx-auto max-w-md justify-center px-6">
       <h1 className="text-[2.75rem] font-semibold leading-[1.05] tracking-tight">
-        Deutsch<br />za dvoje
+        Hallo-Bok!
       </h1>
       <p className="mt-4 text-lg text-tiho">Uči sama, a i skupa s Ivom.</p>
 
@@ -59,6 +59,9 @@ export default function Prijava() {
 
       <p className="mt-8 text-xs text-tiho">
         Prijava je potrebna samo jednom.
+      </p>
+      <p className="mt-3 text-xs text-tiho/70">
+        Za malu Mariju.
       </p>
       <Podnozje />
     </main>
