@@ -1,18 +1,22 @@
 module.exports = {
-  content: ["./app/**/*.{js,jsx}", "./components/**/*.{js,jsx}"],
+  darkMode: "class",
+  content: ["./app/**/*.{js,jsx}", "./lib/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
-        tinta:  "#10333F",  // dunkles Blaugrün, Schrift
-        more:   "#17798F",  // Adria-Blau, Hauptfarbe
-        magla:  "#E7EEEF",  // heller Hintergrund
-        pijesak:"#E8A33D",  // Sandgelb, Punkte
-        koral:  "#C4553B"   // Rot, falsche Antwort
+        pod:    "rgb(var(--pod) / <alpha-value>)",   // Hintergrund
+        ploha:  "rgb(var(--ploha) / <alpha-value>)", // Karten
+        tekst:  "rgb(var(--tekst) / <alpha-value>)", // Schrift
+        tiho:   "rgb(var(--tiho) / <alpha-value>)",  // Schrift leise
+        rub:    "rgb(var(--rub) / <alpha-value>)",   // Linien
+        akzent: "rgb(var(--akzent) / <alpha-value>)",
+        alarm:  "#D9534F"
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Fraunces", "Georgia", "serif"]
-      }
+        sans: ["-apple-system", "BlinkMacSystemFont", "SF Pro Display",
+               "SF Pro Text", "system-ui", "Segoe UI", "Roboto", "sans-serif"]
+      },
+      borderRadius: { xl2: "1.25rem" }
     }
   },
   plugins: []
