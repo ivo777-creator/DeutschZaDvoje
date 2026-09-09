@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, akzentSetzen, punkteDazu, aktivitaetDazu, vorlesen } from "../../lib/supabase";
+import { supabase, akzentSetzen, punkteDazu, aktivitaetDazu, vorlesen, TEZINA } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
 
 const SCENE = [
@@ -100,8 +100,10 @@ export default function Razgovor() {
   function zavrsi() {
     if (uid && poruke.length > 1) {
       punkteDazu(uid, Math.min(poruke.length * 5, 100));
-      aktivitaetDazu(uid, poruke.filter((p) => p.od === "ja").length,
-        Math.round((Date.now() - pocetak.current) / 1000));
+      const mojih = poruke.filter((p) => p.od === "ja").length;
+      aktivitaetDazu(uid, mojih,
+        Math.round((Date.now() - pocetak.current) / 1000),
+        mojih * TEZINA.poruka);
     }
     router.push("/start");
   }

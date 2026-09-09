@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, akzentSetzen, punkteDazu, aktivitaetDazu, vorlesen } from "../../lib/supabase";
+import { supabase, akzentSetzen, punkteDazu, aktivitaetDazu, vorlesen, TEZINA } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
 
 /* Feste Aufträge — kosten nichts und sind auf A1 zugeschnitten. */
@@ -78,7 +78,7 @@ export default function Pisanje() {
     setBroj(n);
     if (uid) {
       punkteDazu(uid, 10);
-      aktivitaetDazu(uid, 1, Math.round((Date.now() - pocetak.current) / 1000));
+      aktivitaetDazu(uid, 1, Math.round((Date.now() - pocetak.current) / 1000), TEZINA.recenica);
       pocetak.current = Date.now();
     }
     setRez(null);

@@ -87,7 +87,7 @@ export default function Start() {
 
       const znane = (mojNapredak.data || []).filter((n) => n.richtig >= 2).length;
       const ukupno = (akt.data || []).filter((a) => a.user_id === uid)
-        .reduce((z, a) => z + a.karten, 0);
+        .reduce((z, a) => z + Number(a.tezina || 0), 0);
       setLinija(prognoza(znane, ukupno / 28));
 
       provjeriSat();
@@ -325,6 +325,14 @@ export default function Start() {
                 <p className="mt-1 text-xs text-tiho">Osam situacija iz stvarnog života</p>
               </button>
             </div>
+
+            <button onClick={() => router.push("/igre")}
+              className="ploca w-full p-4 text-left">
+              <p className="font-medium">Igre</p>
+              <p className="mt-1 text-xs text-tiho">
+                Brzina, parovi i dvoboj protiv Ive
+              </p>
+            </button>
 
             <section>
               <h2 className="text-lg font-semibold tracking-tight">Vježbaj po temama</h2>
