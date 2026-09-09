@@ -99,6 +99,13 @@ export default function Sesija() {
     setSesija({ ...sesija, loesung_sichtbar: true });
   }
 
+  async function prekini() {
+    await supabase.from("sessions")
+      .update({ status: "fertig", beendet: new Date().toISOString(), loesung_sichtbar: false })
+      .eq("id", sesija.id);
+    router.push("/start");
+  }
+
   async function ocijeni(bilo) {
     const id = sesija.karten_ids[sesija.position];
     await supabase.from("session_antworten")
@@ -175,6 +182,17 @@ export default function Sesija() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col px-5 pb-10 pt-8">
+      <div className="mb-4 flex items-center justify-between">
+        <button onClick={() => router.push("/start")} className="text-sm text-tiho">
+          ← Natrag
+        </button>
+        {trainer && (
+          <button onClick={prekini} className="text-sm text-alarm">
+            Prekini sat
+          </button>
+        )}
+      </div>
+
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-ploha">
         <div className="h-full rounded-full bg-akzent transition-all"
              style={{ width: `${((sesija.position + 1) / sesija.karten_ids.length) * 100}%` }} />
