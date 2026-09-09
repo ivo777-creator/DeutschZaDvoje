@@ -6,6 +6,7 @@ import {
   supabase, akzentSetzen, themaSetzen, themaLesen, prognoza, minute
 } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
+import { putanja, trenutnoNiveau } from "../../lib/nivoi";
 
 export default function Start() {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function Start() {
   const [danas, setDanas] = useState({ ja: null, drugi: null });
   const [tema, setTema] = useState("auto");
   const [sesija, setSesija] = useState(null);
+  const [niveau, setNiveau] = useState("A1");
+  const [staza, setStaza] = useState({ razine: [], sveGotovo: false });
 
   useEffect(() => { setTema(themaLesen()); }, []);
 
@@ -37,13 +40,14 @@ export default function Start() {
       const danasnji = new Date().toISOString().slice(0, 10);
       const prije28 = new Date(Date.now() - 28 * 864e5).toISOString().slice(0, 10);
 
-      const [profili, sviBodovi, sveTeme, sveKarte, mojNapredak, akt] = await Promise.all([
+      const [profili, sviBodovi, sveTeme, sveKarte, mojNapredak, akt, isp] = await Promise.all([
         supabase.from("profile").select("*"),
         supabase.from("punkte").select("*"),
         supabase.from("themen").select("*").order("reihenfolge"),
-        supabase.from("karten").select("id, thema_id"),
+        supabase.from("karten").select("id, thema_id, de"),
         supabase.from("fortschritt").select("karte_id, richtig, naechste_frage").eq("user_id", uid),
-        supabase.from("aktivitaet").select("*").gte("datum", prije28)
+        supabase.from("aktivitaet").select("*").gte("datum", prije28),
+        supabase.from("pruefungen").select("*").eq("user_id", uid)
       ]);
 
       const mojProfil = (profili.data || []).find((p) => p.user_id === uid)
@@ -57,6 +61,10 @@ export default function Start() {
       setBodovi((sviBodovi.data || []).find((b) => b.user_id === uid)
         || { xp: 0, level: 1, serie_tage: 0, diese_woche: 0, wochenziel: 5 });
       setTeme(sveTeme.data || []);
+
+      const n = trenutnoNiveau(isp.data);
+      setNiveau(n);
+      setStaza(putanja(sveKarte.data || [], sveTeme.data || [], mojNapredak.data || [], n));
 
       const temaOd = {};
       (sveKarte.data || []).forEach((k) => (temaOd[k.id] = k.thema_id));
@@ -266,8 +274,49 @@ export default function Start() {
               </p>
             </button>
 
+            <section className="ploca p-5">
+              <div className="flex items-baseline justify-between">
+                <h2 className="text-lg font-semibold tracking-tight">Put do {niveau}</h2>
+                <span className="text-xs text-tiho">
+                  {staza.razine.filter((r) => r.gotovo).length} / {staza.razine.length}
+                </span>
+              </div>
+
+              <div className="putanja mt-4">
+                {staza.razine.map((r, idx) => {
+                  const prijasnjeGotove = staza.razine.slice(0, idx).every((x) => x.gotovo);
+                  const sada = !r.gotovo && prijasnjeGotove;
+                  return (
+                    <div key={r.broj} className="flex items-center">
+                      {idx > 0 && <span className={`crta ${r.gotovo ? "crta-ok" : ""}`} />}
+                      <button
+                        onClick={() => router.push(`/lernen?razina=${r.broj}`)}
+                        title={`${r.gotovih} / ${r.ukupno}`}
+                        className={`cvor ${r.gotovo ? "cvor-ok" : sada ? "cvor-sada" : ""}`}>
+                        {r.broj}
+                      </button>
+                    </div>
+                  );
+                })}
+
+                <span className={`crta ${staza.sveGotovo ? "crta-ok" : ""}`} />
+                <button
+                  onClick={() => staza.sveGotovo && router.push("/ispit")}
+                  disabled={!staza.sveGotovo}
+                  className={`cvor cvor-ispit ${staza.sveGotovo ? "cvor-sada animate-pulse" : "opacity-50"}`}>
+                  Ispit
+                </button>
+              </div>
+
+              <p className="mt-3 text-xs text-tiho">
+                {staza.sveGotovo
+                  ? `Sve razine su gotove. Ispit: 30 pitanja, 80% za prolaz.`
+                  : "Svaka razina ima 10 kartica. Kad sve sjednu, otvara se ispit."}
+              </p>
+            </section>
+
             <section>
-              <h2 className="text-lg font-semibold tracking-tight">Vježbaj sama</h2>
+              <h2 className="text-lg font-semibold tracking-tight">Vježbaj po temama</h2>
               <div className="mt-3 space-y-2">
                 {teme.map((t) => (
                   <button key={t.id} onClick={() => router.push(`/lernen?tema=${t.id}`)}
