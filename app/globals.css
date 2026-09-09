@@ -1,15 +1,45 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body { background: #E7EEEF; color: #10333F; }
+:root {
+  --pod:   244 246 250;
+  --ploha: 255 255 255;
+  --tekst:  27  34  48;
+  --tiho:  110 121 140;
+  --rub:   224 229 238;
+  --akzent: 74 111 165;   /* blau, wird pro Person gesetzt */
+}
+
+.dark {
+  --pod:    35  42  54;
+  --ploha:  46  54  68;
+  --tekst: 232 236 243;
+  --tiho:  152 163 181;
+  --rub:    62  74  93;
+}
+
+body {
+  background: rgb(var(--pod));
+  color: rgb(var(--tekst));
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
 @layer components {
+  .ploca { @apply rounded-2xl bg-ploha border border-rub; }
   .knopf {
-    @apply rounded-xl px-5 py-3 font-medium transition
-           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-more;
+    @apply rounded-xl px-5 py-3 font-medium transition active:scale-[0.98]
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-akzent;
   }
-  .knopf-voll { @apply knopf bg-more text-white hover:bg-tinta; }
-  .knopf-leer { @apply knopf bg-white text-tinta border border-tinta/20 hover:border-tinta/50; }
+  .knopf-voll { @apply knopf bg-akzent text-white; }
+  .knopf-leer { @apply knopf bg-ploha border border-rub text-tekst; }
+  .polje {
+    @apply w-full rounded-xl border border-rub bg-ploha px-4 py-3
+           outline-none focus:border-akzent placeholder:text-tiho;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }
