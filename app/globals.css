@@ -19,7 +19,11 @@
   --rub:    62  74  93;
 }
 
+html { overflow-x: hidden; }
+
 body {
+  max-width: 100vw;
+  overflow-x: hidden;
   background: rgb(var(--pod));
   color: rgb(var(--tekst));
   -webkit-font-smoothing: antialiased;
@@ -88,6 +92,7 @@ body {
   overflow-x: auto; scroll-snap-type: x mandatory;
   padding-bottom: 0.25rem;
   -webkit-overflow-scrolling: touch;
+  min-width: 0; max-width: 100%;
 }
 .kartica-nivoa {
   flex: none; scroll-snap-align: start;
@@ -105,6 +110,7 @@ body {
   display: flex; align-items: center; gap: 0;
   overflow-x: auto; padding: 0.5rem 0;
   -webkit-overflow-scrolling: touch;
+  min-width: 0; max-width: 100%;
 }
 .crta { height: 2px; width: 22px; flex: none; background: rgb(var(--rub)); }
 .crta-ok { background: rgb(var(--akzent)); }

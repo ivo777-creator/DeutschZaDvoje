@@ -237,7 +237,7 @@ export default function Start() {
   );
 
   const Traka = (
-    <section className="ploca p-5">
+    <section className="ploca min-w-0 overflow-hidden p-5">
       <div className="flex items-baseline justify-between">
         <h2 className="text-lg font-semibold tracking-tight">Gdje si na putu</h2>
         <span className="text-xs text-tiho">A1 → C2</span>
@@ -294,7 +294,7 @@ export default function Start() {
   );
 
   const Put = (
-    <section className="ploca p-5">
+    <section className="ploca min-w-0 overflow-hidden p-5">
       <div className="flex items-baseline justify-between">
         <h2 className="text-lg font-semibold tracking-tight">Put do {niveau}</h2>
         <span className="text-xs text-tiho">
@@ -305,7 +305,7 @@ export default function Start() {
       <div className="mt-4 space-y-3">
         {put.sekcije.map((sek) => (
           <div key={sek.kljuc}
-            className={`rounded-xl border p-3 ${
+            className={`min-w-0 overflow-hidden rounded-xl border p-3 ${
               sek.ispitPolozen ? "border-akzent/40 bg-akzent/5"
               : sek.otvorena ? "border-rub" : "border-rub opacity-50"}`}>
 
@@ -522,12 +522,12 @@ export default function Start() {
         <div className="mt-5">{Traka}</div>
 
         {/* Telefon: alles untereinander. Notebook: zwei Spalten. */}
-        <div className="mt-5 grid gap-5 md:grid-cols-[1.3fr_1fr] md:items-start">
-          <div className="space-y-5">
+        <div className="mt-5 grid gap-5 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:items-start">
+          <div className="min-w-0 space-y-5">
             {Put}
             <div className="hidden md:block">{Teme}</div>
           </div>
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-5">
             {Bodovi}
             {Drugi}
             {Radnje}
