@@ -23,6 +23,8 @@ body {
   background: rgb(var(--pod));
   color: rgb(var(--tekst));
   -webkit-font-smoothing: antialiased;
+  /* Platz fuer die Statusleiste oben und den Balken unten am iPhone */
+  padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
