@@ -315,6 +315,17 @@ export default function Start() {
               </p>
             </section>
 
+            <div className="grid grid-cols-2 gap-3">
+              <button onClick={() => router.push("/pisanje")} className="ploca p-4 text-left">
+                <p className="font-medium">Pisanje</p>
+                <p className="mt-1 text-xs text-tiho">Napiši rečenicu, dobiješ ispravak</p>
+              </button>
+              <button onClick={() => router.push("/razgovor")} className="ploca p-4 text-left">
+                <p className="font-medium">Razgovor</p>
+                <p className="mt-1 text-xs text-tiho">Osam situacija iz stvarnog života</p>
+              </button>
+            </div>
+
             <section>
               <h2 className="text-lg font-semibold tracking-tight">Vježbaj po temama</h2>
               <div className="mt-3 space-y-2">
