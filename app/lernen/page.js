@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   supabase, vorlesen, punkteDazu, aktivitaetDazu, akzentSetzen
 } from "../../lib/supabase";
+import { Podnozje } from "../../lib/verzija";
 
 function Ucenje() {
   const router = useRouter();
@@ -71,11 +72,12 @@ function Ucenje() {
 
   if (kartice.length === 0) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 text-center">
+      <div className="ekran items-center justify-center px-6 text-center">
         <p className="text-3xl font-semibold tracking-tight">Za danas si gotova</p>
         <p className="mt-2 text-tiho">Sve kartice iz ove teme su ponovljene.</p>
         <button onClick={() => router.push("/start")} className="knopf-voll mt-8">Natrag</button>
-      </main>
+        <Podnozje />
+      </div>
     );
   }
 
@@ -87,34 +89,39 @@ function Ucenje() {
       aktivitaetDazu(uid, kartice.length, sek);
     }
     return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 text-center">
+      <div className="ekran items-center justify-center px-6 text-center">
         <p className="text-5xl font-semibold tracking-tight">{tocno} / {kartice.length}</p>
         <p className="mt-3 text-tiho">+{tocno * 5} bodova</p>
         <button onClick={() => router.push("/start")} className="knopf-voll mt-8">
           Natrag na početnu
         </button>
-      </main>
+        <Podnozje />
+      </div>
     );
   }
 
   const k = kartice[i];
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col px-5 pb-10 pt-8">
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-ploha">
+    <div className="ekran px-5 md:px-8">
+      <div className="mx-auto w-full max-w-md pt-4 md:max-w-2xl">
+        <button onClick={() => router.push("/start")} className="text-sm text-tiho">← Natrag</button>
+      <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-ploha">
         <div className="h-full rounded-full bg-akzent transition-all"
              style={{ width: `${((i + 1) / kartice.length) * 100}%` }} />
       </div>
       <p className="mt-2 text-xs text-tiho">{i + 1} / {kartice.length}</p>
+      </div>
 
-      <div className="flex flex-1 flex-col justify-center">
+      <div className="mx-auto flex w-full max-w-md min-h-0 flex-1 flex-col justify-center
+                      overflow-y-auto py-6 md:max-w-2xl md:py-10">
         <p className="text-sm text-tiho">Kako se kaže?</p>
-        <p className="mt-2 text-4xl font-semibold leading-tight tracking-tight">{k.hr}</p>
+        <p className="mt-2 text-4xl font-semibold leading-tight tracking-tight md:text-5xl">{k.hr}</p>
 
         {otkriveno && (
-          <div className="ploca mt-8 p-5">
+          <div className="ploca mt-6 p-5">
             <div className="flex items-start justify-between gap-3">
-              <p className="text-3xl font-semibold tracking-tight text-akzent">{k.de}</p>
+              <p className="text-3xl font-semibold tracking-tight text-akzent md:text-4xl">{k.de}</p>
               <button onClick={() => vorlesen(k.de)}
                 className="shrink-0 rounded-lg border border-rub px-3 py-2 text-sm text-tiho">
                 Slušaj
@@ -126,21 +133,24 @@ function Ucenje() {
         )}
       </div>
 
-      {otkriveno ? (
-        <div className="mt-8 grid grid-cols-2 gap-3">
-          <button onClick={() => odgovori(false)}
-            className="knopf w-full border border-alarm/30 bg-alarm/10 text-alarm">
-            Nisam znala
+      <div className="mx-auto w-full max-w-md md:max-w-2xl">
+        {otkriveno ? (
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={() => odgovori(false)}
+              className="knopf w-full border border-alarm/30 bg-alarm/10 text-alarm">
+              Nisam znala
+            </button>
+            <button onClick={() => odgovori(true)} className="knopf-voll w-full">Znala sam</button>
+          </div>
+        ) : (
+          <button onClick={() => { setOtkriveno(true); vorlesen(k.de); }}
+            className="knopf-leer w-full">
+            Pokaži rješenje
           </button>
-          <button onClick={() => odgovori(true)} className="knopf-voll w-full">Znala sam</button>
-        </div>
-      ) : (
-        <button onClick={() => { setOtkriveno(true); vorlesen(k.de); }}
-          className="knopf-leer mt-8 w-full">
-          Pokaži rješenje
-        </button>
-      )}
-    </main>
+        )}
+        <Podnozje />
+      </div>
+    </div>
   );
 }
 

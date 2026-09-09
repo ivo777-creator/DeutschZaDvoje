@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { Podnozje } from "../lib/verzija";
 
 export default function Prijava() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function Prijava() {
   if (provjera) return null;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
+    <main className="ekran mx-auto max-w-md justify-center px-6">
       <h1 className="text-[2.75rem] font-semibold leading-[1.05] tracking-tight">
         Deutsch<br />za dvoje
       </h1>
@@ -59,6 +60,7 @@ export default function Prijava() {
       <p className="mt-8 text-xs text-tiho">
         Prijava je potrebna samo jednom.
       </p>
+      <Podnozje />
     </main>
   );
 }

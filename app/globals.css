@@ -8,7 +8,7 @@
   --tekst:  27  34  48;
   --tiho:  110 121 140;
   --rub:   224 229 238;
-  --akzent: 74 111 165;   /* blau, wird pro Person gesetzt */
+  --akzent: 74 111 165;
 }
 
 .dark {
@@ -23,13 +23,35 @@ body {
   background: rgb(var(--pod));
   color: rgb(var(--tekst));
   -webkit-font-smoothing: antialiased;
-  /* Platz fuer die Statusleiste oben und den Balken unten am iPhone */
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+  overscroll-behavior-y: none;
 }
 
+/* Rollbalken ausblenden, Rollen bleibt möglich */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
 @layer components {
+  /* Bildschirm ohne Rollen: Knöpfe sitzen unten, Inhalt dazwischen.
+     Am Notebook wird daraus eine normale, mitwachsende Seite. */
+  .ekran {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  @media (min-width: 768px) {
+    .ekran { height: auto; min-height: 100vh; justify-content: center; }
+  }
+
+  /* Normale, rollbare Seite */
+  .stranica {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  }
+
   .ploca { @apply rounded-2xl bg-ploha border border-rub; }
+
   .knopf {
     @apply rounded-xl px-5 py-3 font-medium transition active:scale-[0.98]
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-akzent;
