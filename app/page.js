@@ -12,7 +12,6 @@ export default function Prijava() {
   const [radi, setRadi] = useState(false);
   const [provjera, setProvjera] = useState(true);
 
-  // Schon eingeloggt? Dann direkt weiter.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) router.replace("/start");
@@ -21,11 +20,9 @@ export default function Prijava() {
   }, [router]);
 
   async function prijavi() {
-    setRadi(true);
-    setGreska("");
+    setRadi(true); setGreska("");
     const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: lozinka
+      email: email.trim(), password: lozinka
     });
     if (error) {
       setGreska("Email ili lozinka nisu točni. Pokušaj ponovno.");
@@ -39,45 +36,28 @@ export default function Prijava() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
-      <p className="mb-2 text-sm text-tinta/60">Njemački od nule</p>
-      <h1 className="font-display text-5xl leading-none text-tinta">
+      <h1 className="text-[2.75rem] font-semibold leading-[1.05] tracking-tight">
         Deutsch<br />za dvoje
       </h1>
-      <p className="mt-4 max-w-xs text-tinta/70">
-        Uči svaki dan sama, a jednom tjedno vježbate zajedno.
-      </p>
+      <p className="mt-4 text-lg text-tiho">Uči sama, a i skupa s Ivom.</p>
 
       <div className="mt-10 space-y-3">
-        <input
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-tinta/15 bg-white px-4 py-3
-                     outline-none focus:border-more"
-        />
-        <input
-          type="password"
-          autoComplete="current-password"
-          placeholder="Lozinka"
-          value={lozinka}
-          onChange={(e) => setLozinka(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && prijavi()}
-          className="w-full rounded-xl border border-tinta/15 bg-white px-4 py-3
-                     outline-none focus:border-more"
-        />
+        <input type="email" inputMode="email" autoComplete="email" placeholder="Email"
+          value={email} onChange={(e) => setEmail(e.target.value)} className="polje" />
+        <input type="password" autoComplete="current-password" placeholder="Lozinka"
+          value={lozinka} onChange={(e) => setLozinka(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && prijavi()} className="polje" />
 
-        {greska && <p className="text-sm text-koral">{greska}</p>}
+        {greska && <p className="text-sm text-alarm">{greska}</p>}
 
-        <button onClick={prijavi} disabled={radi} className="knopf-voll w-full disabled:opacity-50">
+        <button onClick={prijavi} disabled={radi}
+          className="knopf-voll w-full disabled:opacity-50">
           {radi ? "Trenutak..." : "Prijavi se"}
         </button>
       </div>
 
-      <p className="mt-8 text-xs text-tinta/50">
-        Prijava je potrebna samo jednom. Nakon toga ostaješ prijavljena.
+      <p className="mt-8 text-xs text-tiho">
+        Prijava je potrebna samo jednom.
       </p>
     </main>
   );
