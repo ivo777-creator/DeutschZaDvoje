@@ -6,7 +6,7 @@ import {
   supabase, akzentSetzen, themaSetzen, themaLesen, prognoza, minute
 } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
-import { putanja, trenutnoNiveau } from "../../lib/nivoi";
+import { staza, trenutnoNiveau } from "../../lib/nivoi";
 
 export default function Start() {
   const router = useRouter();
@@ -22,7 +22,8 @@ export default function Start() {
   const [tema, setTema] = useState("auto");
   const [sesija, setSesija] = useState(null);
   const [niveau, setNiveau] = useState("A1");
-  const [staza, setStaza] = useState({ razine: [], sveGotovo: false });
+  const [put, setPut] = useState(null);
+  const [otvoren, setOtvoren] = useState(null);
 
   useEffect(() => { setTema(themaLesen()); }, []);
 
@@ -64,7 +65,10 @@ export default function Start() {
 
       const n = trenutnoNiveau(isp.data);
       setNiveau(n);
-      setStaza(putanja(sveKarte.data || [], sveTeme.data || [], mojNapredak.data || [], n));
+      const st = staza(sveKarte.data || [], sveTeme.data || [],
+        mojNapredak.data || [], n, isp.data || []);
+      setPut(st);
+      setOtvoren(st.sekcije.find((x) => !x.ispitPolozen)?.kljuc ?? null);
 
       const temaOd = {};
       (sveKarte.data || []).forEach((k) => (temaOd[k.id] = k.thema_id));
@@ -199,120 +203,95 @@ export default function Start() {
 
           <div className="space-y-4">
             <section className="ploca p-5">
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="text-sm text-tiho">Razina</p>
-                  <p className="text-4xl font-semibold leading-none tracking-tight">{bodovi.level}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-tiho">Niz dana</p>
-                  <p className="text-4xl font-semibold leading-none tracking-tight text-akzent">
-                    {bodovi.serie_tage}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-pod">
-                <div className="h-full rounded-full bg-akzent transition-all"
-                     style={{ width: `${napredak}%` }} />
-              </div>
-              <p className="mt-2 text-xs text-tiho">
-                {bodovi.xp} bodova · ovaj tjedan {bodovi.diese_woche}/{bodovi.wochenziel} dana
-              </p>
-            </section>
-
-            <section className="ploca p-5">
-              <p className="font-semibold tracking-tight">Do kojeg nivoa i kada</p>
-              <p className="mt-1 text-xs text-tiho">
-                Procjena prema tvom tempu zadnjih tjedana.
-              </p>
-              <ul className="mt-4 space-y-3">
-                {linija.map((n) => (
-                  <li key={n.oznaka} className="flex items-center gap-3">
-                    <span className={`w-9 shrink-0 text-sm font-semibold ${n.gotovo ? "text-akzent" : "text-tiho"}`}>
-                      {n.oznaka}
-                    </span>
-                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-pod">
-                      <span className="block h-full rounded-full bg-akzent"
-                            style={{ width: n.gotovo ? "100%" : `${Math.max(3, 100 - Math.min(n.dana / 12, 97))}%` }} />
-                    </span>
-                    <span className="w-24 shrink-0 text-right text-sm text-tiho">{n.kada}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            {drugi && (
-              <section className="ploca flex items-center gap-3 p-4">
-                <span className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-pod">
-                  {drugi.bild_url
-                    ? <img src={drugi.bild_url} alt="" className="h-full w-full object-cover" />
-                    : <span className="flex h-full w-full items-center justify-center text-tiho">
-                        {(drugi.name || "?").slice(0, 1)}
-                      </span>}
-                </span>
-                <p className="text-sm">
-                  <span className="font-medium">{drugi.name}</span>{" "}
-                  <span className="text-tiho">
-                    {danas.drugi
-                      ? `danas ${minute(danas.drugi.sekunden)}, ${danas.drugi.karten} kartica`
-                      : "danas još ništa"}
-                  </span>
-                </p>
-              </section>
-            )}
-          </div>
-
-          <div className="mt-4 space-y-4 md:mt-0">
-            <button onClick={() => router.push("/session")}
-              className={`w-full rounded-2xl p-5 text-left ${sesija ? "bg-akzent text-white" : "ploca"}`}>
-              <p className="text-xl font-semibold tracking-tight">
-                {sesija ? "Sat je počeo" : "Zajednički sat"}
-              </p>
-              <p className={`mt-1 text-sm ${sesija ? "text-white/80" : "text-tiho"}`}>
-                {sesija ? "Uđi u zajedničku vježbu"
-                        : ja.rolle === "trainer" ? "Pokreni vježbu" : "Čekaj da Ivo pokrene sat"}
-              </p>
-            </button>
-
-            <section className="ploca p-5">
               <div className="flex items-baseline justify-between">
                 <h2 className="text-lg font-semibold tracking-tight">Put do {niveau}</h2>
                 <span className="text-xs text-tiho">
-                  {staza.razine.filter((r) => r.gotovo).length} / {staza.razine.length}
+                  {put?.sekcije.filter((x) => x.ispitPolozen).length} / {put?.sekcije.length}
                 </span>
               </div>
 
-              <div className="putanja mt-4">
-                {staza.razine.map((r, idx) => {
-                  const prijasnjeGotove = staza.razine.slice(0, idx).every((x) => x.gotovo);
-                  const sada = !r.gotovo && prijasnjeGotove;
-                  return (
-                    <div key={r.broj} className="flex items-center">
-                      {idx > 0 && <span className={`crta ${r.gotovo ? "crta-ok" : ""}`} />}
-                      <button
-                        onClick={() => router.push(`/lernen?razina=${r.broj}`)}
-                        title={`${r.gotovih} / ${r.ukupno}`}
-                        className={`cvor ${r.gotovo ? "cvor-ok" : sada ? "cvor-sada" : ""}`}>
-                        {r.broj}
-                      </button>
-                    </div>
-                  );
-                })}
+              <div className="mt-4 space-y-3">
+                {put?.sekcije.map((sek) => (
+                  <div key={sek.kljuc}
+                    className={`rounded-xl border p-3 ${
+                      sek.ispitPolozen ? "border-akzent/40 bg-akzent/5"
+                      : sek.otvorena ? "border-rub" : "border-rub opacity-50"}`}>
 
-                <span className={`crta ${staza.sveGotovo ? "crta-ok" : ""}`} />
-                <button
-                  onClick={() => staza.sveGotovo && router.push("/ispit")}
-                  disabled={!staza.sveGotovo}
-                  className={`cvor cvor-ispit ${staza.sveGotovo ? "cvor-sada animate-pulse" : "opacity-50"}`}>
-                  Ispit
-                </button>
+                    <button
+                      onClick={() => sek.otvorena &&
+                        setOtvoren(otvoren === sek.kljuc ? null : sek.kljuc)}
+                      className="flex w-full items-center gap-3 text-left">
+                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full
+                                        text-xs font-semibold ${
+                        sek.ispitPolozen ? "bg-akzent text-white"
+                          : "border-2 border-rub text-tiho"}`}>
+                        {sek.ispitPolozen ? "✓" : sek.gotovih}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-medium">{sek.ime}</span>
+                        <span className="block truncate text-xs text-tiho">
+                          {sek.otvorena
+                            ? `${sek.gotovih} / ${sek.razine.length} razina`
+                            : "Zaključano"}
+                        </span>
+                      </span>
+                    </button>
+
+                    {otvoren === sek.kljuc && sek.otvorena && (
+                      <>
+                        <div className="putanja mt-3">
+                          {sek.razine.map((r, idx) => {
+                            const prije = sek.razine.slice(0, idx).every((x) => x.gotovo);
+                            const sada = !r.gotovo && prije;
+                            return (
+                              <div key={r.broj} className="flex items-center">
+                                {idx > 0 && <span className={`crta ${r.gotovo ? "crta-ok" : ""}`} />}
+                                <button
+                                  onClick={() => router.push(
+                                    `/lernen?sekcija=${sek.kljuc}&razina=${r.broj}`)}
+                                  title={`${r.gotovih} / ${r.ukupno}`}
+                                  className={`cvor ${r.gotovo ? "cvor-ok" : sada ? "cvor-sada" : ""}`}>
+                                  {r.broj}
+                                </button>
+                              </div>
+                            );
+                          })}
+                          <span className={`crta ${sek.ispitPolozen ? "crta-ok" : ""}`} />
+                          <button
+                            onClick={() => sek.ispitOtvoren &&
+                              router.push(`/ispit?sekcija=${sek.kljuc}`)}
+                            disabled={!sek.ispitOtvoren}
+                            className={`cvor cvor-ispit ${
+                              sek.ispitPolozen ? "cvor-ok"
+                              : sek.ispitOtvoren ? "cvor-sada animate-pulse" : "opacity-50"}`}>
+                            Ispit
+                          </button>
+                        </div>
+                        <p className="mt-2 text-xs text-tiho">{sek.opis}</p>
+                      </>
+                    )}
+                  </div>
+                ))}
               </div>
 
-              <p className="mt-3 text-xs text-tiho">
-                {staza.sveGotovo
-                  ? `Sve razine su gotove. Ispit: 30 pitanja, 80% za prolaz.`
-                  : "Svaka razina ima 10 kartica. Kad sve sjednu, otvara se ispit."}
-              </p>
+              {/* Die grosse Prüfung */}
+              <button
+                onClick={() => put?.velikiIspitOtvoren && router.push("/ispit")}
+                disabled={!put?.velikiIspitOtvoren}
+                className={`mt-4 w-full rounded-xl p-4 text-left ${
+                  put?.velikiIspitOtvoren
+                    ? "bg-akzent text-white"
+                    : "border border-rub opacity-60"}`}>
+                <p className="font-semibold tracking-tight">Veliki ispit {niveau}</p>
+                <p className={`mt-1 text-xs ${
+                  put?.velikiIspitOtvoren ? "text-white/80" : "text-tiho"}`}>
+                  {put?.velikiIspitOtvoren
+                    ? "40 pitanja, sve vrste zadataka"
+                    : !put?.dovoljnoGradiva
+                      ? `Gradivo: ${put?.ukupnoRijeci} / ${put?.trebaRijeci} riječi`
+                      : "Prvo sva tri dijela"}
+                </p>
+              </button>
             </section>
 
             <div className="grid grid-cols-2 gap-3">
@@ -337,7 +316,7 @@ export default function Start() {
             <section>
               <h2 className="text-lg font-semibold tracking-tight">Vježbaj po temama</h2>
               <div className="mt-3 space-y-2">
-                {teme.map((t) => (
+                {teme.filter((t) => (t.stufe || "A1") === niveau).map((t) => (
                   <button key={t.id} onClick={() => router.push(`/lernen?tema=${t.id}`)}
                     className="ploca flex w-full items-center gap-3 p-4 text-left">
                     <span className="min-w-0 flex-1">

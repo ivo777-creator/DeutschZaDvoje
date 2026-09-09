@@ -6,6 +6,7 @@ import {
   supabase, akzentSetzen, punkteDazu, aktivitaetDazu, vorlesen, TEZINA
 } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
+import { karteNivoa, trenutnoNiveau } from "../../lib/nivoi";
 
 /* ============================================================
    Gemeinsame Helfer
@@ -36,12 +37,15 @@ export default function Igre() {
       if (!s.session) return router.replace("/");
       setUid(s.session.user.id);
 
-      const [{ data: p }, { data: k }] = await Promise.all([
+      const [{ data: p }, { data: k }, { data: teme }, { data: isp }] = await Promise.all([
         supabase.from("profile").select("akzent").eq("user_id", s.session.user.id).maybeSingle(),
-        supabase.from("karten").select("*")
+        supabase.from("karten").select("*"),
+        supabase.from("themen").select("*"),
+        supabase.from("pruefungen").select("*").eq("user_id", s.session.user.id)
       ]);
       akzentSetzen(p?.akzent);
-      setKarte(k || []);
+      // Spiele ziehen nur aus dem Niveau, das gerade dran ist
+      setKarte(karteNivoa(k || [], teme || [], trenutnoNiveau(isp)));
     })();
   }, [router]);
 

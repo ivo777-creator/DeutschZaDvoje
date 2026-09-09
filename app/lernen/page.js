@@ -6,13 +6,14 @@ import {
   supabase, vorlesen, punkteDazu, aktivitaetDazu, akzentSetzen
 } from "../../lib/supabase";
 import { Podnozje } from "../../lib/verzija";
-import { putanja, trenutnoNiveau, vrstaZadatka, usporedi } from "../../lib/nivoi";
+import { staza, trenutnoNiveau, vrstaZadatka, usporedi } from "../../lib/nivoi";
 
 function Ucenje() {
   const router = useRouter();
   const trazilica = useSearchParams();
   const tema = trazilica.get("tema");
   const razina = trazilica.get("razina");
+  const sekcija = trazilica.get("sekcija");
 
   const pocetak = useRef(Date.now());
   const spremljeno = useRef(false);
@@ -50,8 +51,9 @@ function Ucenje() {
 
       let izbor;
       if (razina) {
-        const st = putanja(sve || [], teme || [], nap || [], trenutnoNiveau(isp));
-        izbor = st.razine[Number(razina) - 1]?.karte || [];
+        const st = staza(sve || [], teme || [], nap || [], trenutnoNiveau(isp), isp || []);
+        const sek = st.sekcije.find((x) => x.kljuc === sekcija) || st.sekcije[0];
+        izbor = sek?.razine[Number(razina) - 1]?.karte || [];
       } else {
         const sada = Date.now();
         izbor = (sve || [])
@@ -67,7 +69,7 @@ function Ucenje() {
       }
       setKartice(izbor);
     })();
-  }, [tema, razina, router]);
+  }, [tema, razina, sekcija, router]);
 
   async function zapisi(k, znam) {
     const post = stanje[k.id];
