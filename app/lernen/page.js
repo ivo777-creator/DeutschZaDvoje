@@ -199,6 +199,8 @@ function Ucenje() {
       <div className="mx-auto flex w-full max-w-md min-h-0 flex-1 flex-col justify-center
                       overflow-y-auto py-6 md:max-w-2xl md:py-10">
 
+        {k.emoji && <p className="mb-1 text-5xl leading-none">{k.emoji}</p>}
+
         {vrsta === "clan" ? (
           <>
             <p className="text-sm text-tiho">Koji član ide uz ovu riječ?</p>

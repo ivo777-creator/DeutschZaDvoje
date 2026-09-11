@@ -302,7 +302,20 @@ export default function Start() {
         </span>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <button onClick={() => router.push("/gramatika")}
+        className="mt-4 flex w-full items-center gap-3 rounded-xl border border-akzent/40 bg-akzent/5 p-3 text-left">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-akzent text-sm text-white">
+          §
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium">Gramatika</span>
+          <span className="block text-xs text-tiho">
+            Članovi, sein i haben, nastavci — kratka pravila
+          </span>
+        </span>
+      </button>
+
+      <div className="mt-3 space-y-3">
         {put.sekcije.map((sek) => (
           <div key={sek.kljuc}
             className={`min-w-0 overflow-hidden rounded-xl border p-3 ${
@@ -376,8 +389,15 @@ export default function Start() {
                 <p className="mt-2 text-xs text-tiho">{sek.opis}</p>
                 <p className="mt-1 text-xs text-tiho">
                   Kartica se boji tek kad sjedne dvaput, s pauzom između.
-                  {sek.popravak.length > 0 &&
-                    ` Razina X skuplja ono što ti je zadavalo muke (${sek.popravak.length}).`}
+                </p>
+                <p className="mt-1 text-xs text-tiho">
+                  {sek.popravak.length === 0
+                    ? "Razina X pojavit će se ovdje ako neka kartica zadaje muke."
+                    : sek.popravakGotov
+                      ? `Razina X: ${sek.popravak.length} kartica, sve riješene.`
+                      : sek.popravakOtvoren
+                        ? `Razina X čeka: ${sek.popravak.length} kartica koje su zadavale muke.`
+                        : `Razina X skuplja ${sek.popravak.length} kartica koje su zadavale muke — otvara se kad sve razine budu pune.`}
                 </p>
               </>
             )}

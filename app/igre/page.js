@@ -155,6 +155,7 @@ function Brzina({ uid, karte, natrag }) {
 
       <div className="mx-auto flex w-full max-w-md min-h-0 flex-1 flex-col justify-center
                       overflow-y-auto py-6 md:max-w-2xl">
+        {p.karta.emoji && <p className="mb-2 text-5xl leading-none">{p.karta.emoji}</p>}
         <p className="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
           {p.karta.hr}
         </p>
